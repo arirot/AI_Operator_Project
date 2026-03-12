@@ -246,12 +246,9 @@ with tab_shap:
     st.markdown("Local Feature Impact (Current Input)")
     shap.initjs()
     local_shap = explainer.shap_values(scenario_df)
-    shap_html = shap.force_plot(
-        explainer.expected_value,
-        local_shap,
-        scenario_df,
-        matplotlib=False,
-    )
+    shap_html = shap.force_plot(explainer.expected_value, local_shap, scenario_df, matplotlib=True)
+    st.pyplot()
+
     st.components.v1.html(shap_html.html(), height=300)
 
     st.markdown("Global Feature Importance (Mean |SHAP|)")
