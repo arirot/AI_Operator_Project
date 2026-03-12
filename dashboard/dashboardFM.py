@@ -6,7 +6,7 @@ import pandas as pd
 import shap
 import joblib
 import streamlit as st
-#from lime.lime_tabular import LimeTabularExplainer
+from lime.lime_tabular import LimeTabularExplainer
 
 # -------------------------------
 # Test to confirm app is running
