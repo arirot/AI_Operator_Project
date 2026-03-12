@@ -1,16 +1,7 @@
-import time
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
-import shap
-import joblib
-import streamlit as st
-from lime.lime_tabular import LimeTabularExplainer
-
 # -------------------------------
 # Test to confirm app is running
 # -------------------------------
+import streamlit as st
 st.write("App started successfully")
 
 # -------------------------------
@@ -21,6 +12,16 @@ st.set_page_config(
     page_icon="##",
     layout="wide",
 )
+
+import time
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import shap
+import joblib
+from lime.lime_tabular import LimeTabularExplainer
+
 
 st.markdown(
     """
