@@ -255,7 +255,7 @@ with tab_shap:
     shap_html = shap.force_plot(explainer.expected_value, local_shap, scenario_df, matplotlib=True)
     st.pyplot()
 
-    st.components.v1.html(shap_html.html(), height=300)
+    #st.components.v1.html(shap_html.html(), height=300)
 
     st.markdown("Global Feature Importance (Mean |SHAP|)")
     shap.summary_plot(shap_values, X_train, plot_type="bar", show=False)
