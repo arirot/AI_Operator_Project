@@ -52,9 +52,16 @@ def load_model_and_data():
     model = joblib.load(model_path)
     df = pd.read_csv(data_path)
 
-    # Assume same preprocessing as training
-    # Binary target: 'Machine_failure' or similar
-    target_col = "Machine_failure"
+    # Rename raw AI4I dataset columns to match model expectations
+    df = df.rename(columns={
+        "Air temperature [K]": "Air_temperature_K",
+        "Process temperature [K]": "Process_temperature_K",
+        "Rotational speed [rpm]": "Rotational_speed_rpm",
+        "Torque [Nm]": "Torque_Nm",
+        "Tool wear [min]": "Tool_wear_min",
+        "Machine failure": "Machine_failure",
+    })
+
     feature_cols = [
         "Air_temperature_K",
         "Process_temperature_K",
@@ -62,6 +69,8 @@ def load_model_and_data():
         "Torque_Nm",
         "Tool_wear_min",
     ]
+
+    target_col = "Machine_failure"
 
     X = df[feature_cols]
     y = df[target_col]
@@ -76,7 +85,6 @@ model, df, X, y, feature_cols, target_col = load_model_and_data()
 # -------------------------------
 @st.cache_resource
 def compute_global_importance(model, feature_cols):
-    # XGBoost model from xgboost.XGBClassifier or similar
     importances = model.feature_importances_
     global_importance_df = pd.DataFrame(
         {"feature": feature_cols, "importance": importances}
@@ -87,7 +95,7 @@ def compute_global_importance(model, feature_cols):
 global_importance_df = compute_global_importance(model, feature_cols)
 
 # -------------------------------
-# Permutation importance (optional, can be slower)
+# Permutation importance
 # -------------------------------
 @st.cache_resource
 def compute_permutation_importance(model, X, y):
@@ -154,7 +162,6 @@ with col2:
 with col3:
     speed = st.slider("Rotational Speed (rpm)", 500.0, 3000.0, 1500.0, 50.0)
 
-# For simplicity, fix other features using median values
 process_temp = float(df["Process_temperature_K"].median())
 tool_wear = float(df["Tool_wear_min"].median())
 
@@ -181,14 +188,9 @@ left, middle, right = st.columns([1.2, 1.2, 1.4])
 
 with left:
     st.markdown("### Prediction & Risk Gauge")
-    st.metric(
-        label="Status",
-        value=pred_label,
-    )
-    st.metric(
-        label="Failure Risk (0–1)",
-        value=f"{proba:.2f}",
-    )
+    st.metric("Status", pred_label)
+    st.metric("Failure Risk (0–1)", f"{proba:.2f}")
+
     if proba < 0.3:
         action_text = "Risk is low. Continue monitoring."
     elif proba < 0.6:
@@ -207,20 +209,11 @@ with middle:
 with right:
     st.markdown("### Operator context")
     if persona == "Control Room Operator":
-        st.write(
-            "You care about immediate safety and alarms. "
-            "Use the risk gauge and recommended action to decide whether to keep the machine running."
-        )
+        st.write("You care about immediate safety and alarms.")
     elif persona == "Maintenance Engineer":
-        st.write(
-            "You care about root causes. Use the Feature Impact and LIME tabs "
-            "to see which features are driving this prediction."
-        )
+        st.write("You care about root causes. Use the Feature Impact and LIME tabs.")
     else:
-        st.write(
-            "You care about long-term reliability. Use global importance and permutation importance "
-            "to understand which features most affect failure risk over time."
-        )
+        st.write("You care about long-term reliability and feature impact.")
 
 # -------------------------------
 # Tabs: Feature impact, LIME, Permutation
@@ -231,10 +224,6 @@ tab1, tab2, tab3 = st.tabs(
 
 with tab1:
     st.subheader("Global Feature Impact (XGBoost)")
-    st.write(
-        "This view shows how important each feature is to the model overall. "
-        "Higher bars mean the feature has a stronger influence on predictions."
-    )
     st.bar_chart(global_importance_df.set_index("feature"))
 
     st.markdown("**Top drivers of failure risk:**")
@@ -243,10 +232,6 @@ with tab1:
 
 with tab2:
     st.subheader("LIME Explanation for Current Scenario")
-    st.write(
-        "This explanation shows which features pushed the prediction towards 'Failure' or 'Normal' "
-        "for the current input."
-    )
 
     exp = lime_explainer.explain_instance(
         scenario_df.iloc[0].values,
@@ -259,16 +244,12 @@ with tab2:
     st.dataframe(lime_df, use_container_width=True)
 
     st.markdown(
-        "Positive contributions push the prediction towards **Failure**, "
-        "negative contributions push it towards **Normal**."
+        "Positive contributions push the prediction toward **Failure**, "
+        "negative contributions push it toward **Normal**."
     )
 
 with tab3:
     st.subheader("Permutation Importance (Model-Agnostic)")
-    st.write(
-        "Permutation importance measures how much the model performance decreases when a feature is shuffled. "
-        "Higher values mean the feature is more important for accurate predictions."
-    )
     st.bar_chart(perm_importance_df.set_index("feature"))
 
 # -------------------------------
