@@ -9,6 +9,11 @@ import streamlit as st
 from lime.lime_tabular import LimeTabularExplainer
 
 # -------------------------------
+# Test to confirm app is running
+# -------------------------------
+st.write("App started successfully")
+
+# -------------------------------
 # Page config & basic theming
 # -------------------------------
 st.set_page_config(
