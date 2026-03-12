@@ -1,17 +1,54 @@
 import time
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-import shap
-import joblib
+#import numpy as np
+#import pandas as pd
+#import shap
+#import joblib
 import streamlit as st
-from lime.lime_tabular import LimeTabularExplainer
+#from lime.lime_tabular import LimeTabularExplainer
 
 # -------------------------------
 # Test to confirm app is running
 # -------------------------------
 st.write("App started successfully")
+
+try:
+    import shap
+    st.write("SHAP imported successfully")
+except Exception as e:
+    st.write("SHAP import failed:", e)
+
+try:
+    import lime
+    st.write("LIME imported successfully")
+except Exception as e:
+    st.write("LIME import failed:", e)
+
+try:
+    import xgboost
+    st.write("XGBoost imported successfully")
+except Exception as e:
+    st.write("XGBoost import failed:", e)
+
+try:
+    import joblib
+    st.write("Joblib imported successfully")
+except Exception as e:
+    st.write("Joblib import failed:", e)
+
+try:
+    import pandas as pd
+    st.write("Pandas imported successfully")
+except Exception as e:
+    st.write("Pandas import failed:", e)
+
+try:
+    import numpy as np
+    st.write("NumPy imported successfully")
+except Exception as e:
+    st.write("NumPy import failed:", e)
+
 
 # -------------------------------
 # Page config & basic theming
