@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import shap
+#import shap
 import joblib
 from lime.lime_tabular import LimeTabularExplainer
 
@@ -97,6 +97,36 @@ lime_explainer = LimeTabularExplainer(
     class_names=["No Failure", "Failure"],
     mode="classification",
 )
+
+# -------------------------------
+# XGBOOST: Adding Global Feature Importance
+# -------------------------------
+importances = model.feature_importances_
+feature_names = model.get_booster().feature_names
+global_importance_df = pd.DataFrame({
+    "feature": feature_names,
+    "importance": importances
+}).sort_values("importance", ascending=False)
+
+#Gives Operator a clean, cloud-safe global view
+st.subheader("Global Feature Importance (XGBoost)")
+st.bar_chart(global_importance_df.set_index("feature"))
+
+
+#Adding Permutation Importance for a more model-agnostic global view, which can be more intuitive for non-technical users and less sensitive to feature correlations. This complements the built-in importance and provides a sanity check on which features truly impact predictions.
+from sklearn.inspection import permutation_importance
+
+perm = permutation_importance(
+    model, X_train, y_train, n_repeats=10, random_state=42
+)
+
+perm_df = pd.DataFrame({
+    "feature": X_train.columns,
+    "importance": perm.importances_mean
+}).sort_values("importance", ascending=False)
+
+st.subheader("Permutation Importance")
+st.bar_chart(perm_df.set_index("feature"))
 
 
 # -------------------------------
@@ -244,26 +274,36 @@ with tab_pred:
 
 
 # -------------------------------
+# Tab 2: Feature Impact
+# -------------------------------
+with feature_tab:
+    st.subheader("Feature Impact (Cloud‑Safe)")
+    st.write("This view shows how each feature influences the model globally.")
+    st.bar_chart(global_importance_df.set_index("feature"))
+
+
+
+# -------------------------------
 # Tab 2: SHAP (bar + local)
 # -------------------------------
-with tab_shap:
-    st.subheader("SHAP Explanations")
+# with tab_shap:
+#     st.subheader("SHAP Explanations")
 
-    st.markdown("Local Feature Impact (Current Input)")
-    shap.initjs()
-    local_shap = explainer.shap_values(scenario_df)
-    shap_html = shap.force_plot(explainer.expected_value, local_shap, scenario_df, matplotlib=True)
-    st.pyplot()
+#     st.markdown("Local Feature Impact (Current Input)")
+#     shap.initjs()
+#     local_shap = explainer.shap_values(scenario_df)
+#     shap_html = shap.force_plot(explainer.expected_value, local_shap, scenario_df, matplotlib=True)
+#     st.pyplot()
 
-    #st.components.v1.html(shap_html.html(), height=300)
+#     #st.components.v1.html(shap_html.html(), height=300)
 
-    st.markdown("Global Feature Importance (Mean |SHAP|)")
-    shap.summary_plot(shap_values, X_train, plot_type="bar", show=False)
-    st.pyplot()
+#     st.markdown("Global Feature Importance (Mean |SHAP|)")
+#     shap.summary_plot(shap_values, X_train, plot_type="bar", show=False)
+#     st.pyplot()
 
-    st.markdown("SHAP Summary Plot (Distribution)")
-    shap.summary_plot(shap_values, X_train, show=False)
-    st.pyplot()
+#     st.markdown("SHAP Summary Plot (Distribution)")
+#     shap.summary_plot(shap_values, X_train, show=False)
+#     st.pyplot()
 
 
 # -------------------------------
