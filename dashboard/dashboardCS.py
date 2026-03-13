@@ -84,12 +84,13 @@ model, df, X, y, feature_cols, target_col = load_model_and_data()
 # Global feature importance (XGBoost)
 # -------------------------------
 @st.cache_resource
-def compute_global_importance(model, feature_cols):
-    importances = model.feature_importances_
-    global_importance_df = pd.DataFrame(
-        {"feature": feature_cols, "importance": importances}
-    ).sort_values("importance", ascending=False)
-    return global_importance_df
+def compute_global_importance(_model, feature_cols):
+    importances = _model.feature_importances_
+    return pd.DataFrame({
+        "feature": feature_cols,
+        "importance": importances
+    }).sort_values("importance", ascending=False)
+
 
 
 global_importance_df = compute_global_importance(model, feature_cols)
@@ -98,15 +99,14 @@ global_importance_df = compute_global_importance(model, feature_cols)
 # Permutation importance
 # -------------------------------
 @st.cache_resource
-def compute_permutation_importance(model, X, y):
+def compute_permutation_importance(_model, _X, _y):
     perm = permutation_importance(
-        model, X, y, n_repeats=10, random_state=42, n_jobs=-1
+        _model, _X, _y, n_repeats=10, random_state=42, n_jobs=-1
     )
-    perm_df = pd.DataFrame(
-        {"feature": X.columns, "importance": perm.importances_mean}
-    ).sort_values("importance", ascending=False)
-    return perm_df
-
+    return pd.DataFrame({
+        "feature": _X.columns,
+        "importance": perm.importances_mean
+    }).sort_values("importance", ascending=False)
 
 perm_importance_df = compute_permutation_importance(model, X, y)
 
@@ -114,16 +114,14 @@ perm_importance_df = compute_permutation_importance(model, X, y)
 # LIME explainer
 # -------------------------------
 @st.cache_resource
-def build_lime_explainer(X):
-    explainer = LimeTabularExplainer(
-        training_data=X.values,
-        feature_names=X.columns.tolist(),
+def build_lime_explainer(_X):
+    return LimeTabularExplainer(
+        training_data=_X.values,
+        feature_names=_X.columns.tolist(),
         class_names=["Normal", "Failure"],
         mode="classification",
         discretize_continuous=True,
     )
-    return explainer
-
 
 lime_explainer = build_lime_explainer(X)
 
