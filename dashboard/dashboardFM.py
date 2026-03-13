@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-#import shap
+import shap
 import joblib
 from lime.lime_tabular import LimeTabularExplainer
 
@@ -276,34 +276,34 @@ with tab_pred:
 # -------------------------------
 # Tab 2: Feature Impact
 # -------------------------------
-with feature_tab:
-    st.subheader("Feature Impact (Cloud‑Safe)")
-    st.write("This view shows how each feature influences the model globally.")
-    st.bar_chart(global_importance_df.set_index("feature"))
+# with feature_tab:
+#     st.subheader("Feature Impact (Cloud‑Safe)")
+#     st.write("This view shows how each feature influences the model globally.")
+#     st.bar_chart(global_importance_df.set_index("feature"))
 
 
 
 # -------------------------------
 # Tab 2: SHAP (bar + local)
 # -------------------------------
-# with tab_shap:
-#     st.subheader("SHAP Explanations")
+with tab_shap:
+    st.subheader("SHAP Explanations")
 
-#     st.markdown("Local Feature Impact (Current Input)")
-#     shap.initjs()
-#     local_shap = explainer.shap_values(scenario_df)
-#     shap_html = shap.force_plot(explainer.expected_value, local_shap, scenario_df, matplotlib=True)
-#     st.pyplot()
+    st.markdown("Local Feature Impact (Current Input)")
+    shap.initjs()
+    local_shap = explainer.shap_values(scenario_df)
+    shap_html = shap.force_plot(explainer.expected_value, local_shap, scenario_df, matplotlib=True)
+    st.pyplot()
 
-#     #st.components.v1.html(shap_html.html(), height=300)
+    #st.components.v1.html(shap_html.html(), height=300)
 
-#     st.markdown("Global Feature Importance (Mean |SHAP|)")
-#     shap.summary_plot(shap_values, X_train, plot_type="bar", show=False)
-#     st.pyplot()
+    st.markdown("Global Feature Importance (Mean |SHAP|)")
+    shap.summary_plot(shap_values, X_train, plot_type="bar", show=False)
+    st.pyplot()
 
-#     st.markdown("SHAP Summary Plot (Distribution)")
-#     shap.summary_plot(shap_values, X_train, show=False)
-#     st.pyplot()
+    st.markdown("SHAP Summary Plot (Distribution)")
+    shap.summary_plot(shap_values, X_train, show=False)
+    st.pyplot()
 
 
 # -------------------------------
